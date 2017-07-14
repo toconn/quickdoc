@@ -1,6 +1,6 @@
 import unittest
 
-from ua.core.errors.errors import InvalidConfigError
+from ua.core.errors.errors import InvalidConfig
 from ua.core.utils.os.ua_os_factory import create_ua_os
 
 from app_const import DATE_FORMAT
@@ -72,7 +72,7 @@ class Test (unittest.TestCase):
             self._qdoc._validate_def(tag_dict)
             actual = None
             
-        except InvalidConfigError as e:
+        except InvalidConfig as e:
             actual = e
 
 

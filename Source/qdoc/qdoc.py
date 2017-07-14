@@ -5,10 +5,10 @@ import os
 
 from ua.core.comp.duplicates import DuplicateTracker
 from ua.core.comp.findfile import FindFile
-from ua.core.errors.errors import InvalidConfigError
-from ua.core.errors.errors import ItemExistsError
+from ua.core.errors.errors import InvalidConfig
+from ua.core.errors.errors import ItemAlreadyExists
 from ua.core.errors.errors import UserRequestExit
-from ua.core.errors.errors import ValidationError
+from ua.core.errors.errors import FailedValidations
 
 from ua.core.utils import fileutils
 from ua.core.utils import strutils
@@ -25,6 +25,7 @@ SETTING_FILE_NAME = 'fileName'
 SETTING_FILE_DIR = 'fileDir'
 SETTING_FIRST_DATE = 'firstDate'
 
+TAG_COMMAND_COPY_ONLY = "copyOnly"
 TAG_DATE = 'date'
 TAG_FILE_NAME = SETTING_FILE_NAME
 TAG_PARAMS = 'params'
@@ -52,7 +53,7 @@ class QDoc:
         self._def_file = def_file
         self._ua_os = ua_os
         
-        self._file_path_actual = None
+        self._target_file_path = None
         self._def_tag_dict_actual = None
         
         if load_data:
@@ -66,35 +67,41 @@ class QDoc:
             Creates a document from the qdoc_def and parsed_params.
             Saves it in the target directory.
         '''
-         
-        file_content = text_parser_perc.replace_variables (self._def_tag_dict_actual, self._template)
-        file_content = text_parser_perc.remove_escapes(file_content)
+        
+        # Get/Create Content:
+        
+        if TAG_COMMAND_COPY_ONLY not in self._def_tag_dict:
+            file_content = text_parser_perc.replace_variables(self._def_tag_dict_actual, self._template)
+            file_content = text_parser_perc.remove_escapes(file_content)
+        else:
+            file_content = self._template
+
         
         # Create new file:
         
-        file_path = self.file_path()
-        file_dir = fileutils.file_dir (file_path)
+        target_file_path = self.target_file_path()
+        target_file_dir = fileutils.file_dir (target_file_path)
         
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
+        if not os.path.exists(target_file_dir):
+            os.makedirs(target_file_dir)
 
-        if not fileutils.is_file_exists(file_path):
-            file = open (self._file_path_actual, 'wb')
+        if not fileutils.is_file_exists(target_file_path):
+            file = open (self._target_file_path, 'wb')
             file.write (file_content.encode ('utf-8'))
         else:
-            raise ItemExistsError (file_path)
+            raise ItemAlreadyExists (target_file_path)
 
     def def_file_path (self):
         return self._def_file.path
     
-    def file_dir(self):
+    def target_file_dir(self):
         return self._def_tag_dict_actual[SETTING_FILE_DIR]
     
-    def file_name(self):
+    def target_file_name(self):
         return self._def_tag_dict_actual[SETTING_FILE_NAME]
     
-    def file_path(self):
-        return self._file_path_actual
+    def target_file_path(self):
+        return self._target_file_path
     
     def set_params (self, params):
         
@@ -127,19 +134,19 @@ class QDoc:
         
         # check for file name:
         
-        file_path = self._extract_file_path (def_tag_dict_actual)
+        target_file_path = self._get_target_file_path (def_tag_dict_actual)
         
-        if has_var (file_path):
+        if has_var (target_file_path):
 
-            self._file_path_actual = None
+            self._target_file_path = None
             self._def_tag_dict_actual = None
 
-            raise ValidationError ('File path couldn\'t be generated: \'' + self._file_path + '\'')
+            raise FailedValidations('File path couldn\'t be generated: \'' + self._file_path + '\'')
 
         else:
             
             self._def_tag_dict_actual = def_tag_dict_actual
-            self._file_path_actual = file_path
+            self._target_file_path = target_file_path
             
     def tag_dict(self):
         return self._def_tag_dict_actual.copy()
@@ -183,9 +190,6 @@ class QDoc:
     def _create_file (self, def_tag_dict, template_file_path, target_file_path):
         pass
     
-    def _extract_file_path (self, def_tag_dict):
-        return self._ua_os.join_path (def_tag_dict[SETTING_FILE_DIR], def_tag_dict[SETTING_FILE_NAME])
-    
     def _get_def_file_name(self):
         return self._def_file.name + "." + QDOC_DEF_EXT
     
@@ -199,6 +203,11 @@ class QDoc:
         
         return params
 
+    def _get_target_file_path (self, def_tag_dict):
+        ''' Get the target file path by reading the tags from the tag dict.
+        '''
+        return self._ua_os.join_path (def_tag_dict[SETTING_FILE_DIR], def_tag_dict[SETTING_FILE_NAME])
+    
     def _retrieve_def_tag_dict (self, def_file):
         ''' Read in the tags from the def file
             Then process as many of the tags as possible.
@@ -212,7 +221,7 @@ class QDoc:
 
         # Parse
 
-        self._tag_set_defaults (tag_dict)
+        self._set_tag_defaults (tag_dict)
         tag_dict = text_parser_perc.update_variable_values (tag_dict)
         
         return tag_dict
@@ -232,7 +241,7 @@ class QDoc:
                 template_file_path = self._ua_os.join_path(def_dir, file_name)
          
         if not template_file_path:
-            raise InvalidConfigError ('No template found for \'' + name + '\'')
+            raise InvalidConfig ('No template found for \'' + name + '\'')
         
         # Read contents
         template_file = open(template_file_path, 'r')
@@ -240,7 +249,7 @@ class QDoc:
         
         return template
 
-    def _tag_set_defaults (self, tag_dict):
+    def _set_tag_defaults (self, tag_dict):
         
         if not TAG_DATE in tag_dict:
             tag_dict[TAG_DATE] = self._to_date_string (date.today())
@@ -293,7 +302,7 @@ class QDoc:
             errors.append('Missing setting \'' + SETTING_FILE_NAME +'\'.')
             
         if errors:
-            raise InvalidConfigError (errors)
+            raise InvalidConfig (errors)
 
 
 class QdocDefFile:
@@ -354,7 +363,10 @@ class QDocs:
 
             find_count = 0
             
-            for def_file in self._def_file_dict:
+            for def_file_key in self._def_file_dict:
+                
+                def_file = self._def_file_dict[def_file_key]
+                
                 if strutils.startswith_ignore_case(def_file.name, def_name):
                     def_file_actual = def_file
                     find_count += 1
@@ -364,17 +376,21 @@ class QDocs:
                 # print matching names:
                 
                 print ("Names (" + str (find_count) + "): ")
-                for def_file in self._def_file_dict:
+                for def_file_key in self._def_file_dict:
+                
+                    def_file = self._def_file_dict[def_file_key]
+                    
                     if strutils.startswith_ignore_case(def_file.name, def_name):
                         print ("   " + def_file.name)
+
                 print()
                 
-                raise ValidationError('Ambiguous name \'' + def_name + '\'.')
-            
+                raise FailedValidations('Ambiguous name \'' + def_name + '\'.')
+
             
             if find_count < 1:
 
-                raise ValidationError('Could not find \'' + def_name + '\'.')
+                raise FailedValidations('Could not find \'' + def_name + '\'.')
         
         return QDoc(date_format = self._date_format, date_separator = self._date_separator, def_file = def_file_actual, ua_os = self._ua_os)
 
@@ -389,7 +405,7 @@ class QDocs:
         parent_dirs = find_file.findAll(settings_subdir)
         
         if parent_dirs is None:
-            raise InvalidConfigError ("Configuration Error: Could not locate " + settings_subdir + " settings directory.") 
+            raise InvalidConfig ("Configuration Error: Could not locate " + settings_subdir + " settings directory.") 
         
         def_dirs = [ fileutils.join (parent_dir, settings_subdir) for parent_dir in parent_dirs ]
         

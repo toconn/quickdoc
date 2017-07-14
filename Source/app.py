@@ -1,4 +1,4 @@
-from ua.core.errors.errors import ItemExistsError
+from ua.core.errors.errors import ItemAlreadyExists
 from ua.core.utils import fileutils
 
 class App:
@@ -65,29 +65,29 @@ class App:
                 try:
                     
                     if not parsed_params.show_tags_flag:
-                        print ('Dir:  ' + qdoc.file_dir())
-                        print ('Name: ' + qdoc.file_name())
+                        print ('Dir:  ' + qdoc.target_file_dir())
+                        print ('Name: ' + qdoc.target_file_name())
                     
                     qdoc.create()
-                    print ('Document created: \'' + qdoc.file_path() + '\'.')
+                    print ('Document created: \'' + qdoc.target_file_path() + '\'.')
                     
-                except ItemExistsError as e:
+                except ItemAlreadyExists as e:
     
                     print ('File already exists: \'' + e.messages_as_string() + '\'.')
                     print ()
             
             # Open document if exists:
             
-            file_path = qdoc.file_path()
+            target_file_path = qdoc.target_file_path()
             
-            if file_path:
+            if target_file_path:
                 
-                if not parsed_params.new_doc_flag and not fileutils.is_file_exists (file_path):
+                if not parsed_params.new_doc_flag and not fileutils.is_file_exists (target_file_path):
                     
                     # If we are just trying to open the file (not create it) and a perfect match doesn't exist
                     #   find the most recent document.
                     
-                    file_dir = fileutils.file_dir(file_path)
+                    file_dir = fileutils.file_dir(target_file_path)
                     
                     if fileutils.is_dir_exists(file_dir):
                         
@@ -95,17 +95,17 @@ class App:
                         file_paths.sort()
                         
                         if file_paths:
-                            file_path = file_paths[-1]
+                            target_file_path = file_paths[-1]
                     
                 
-                if fileutils.is_file_exists (file_path):
+                if fileutils.is_file_exists (target_file_path):
                     
-                    self._ua_os.open_document(file_path)
+                    self._ua_os.open_document(target_file_path)
                     
                     print ("Done.")
                             
                 else:
-                    print ('Can not find \'' + file_path + '\'')
+                    print ('Can not find \'' + target_file_path + '\'')
  
             print ()
 

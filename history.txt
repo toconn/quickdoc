@@ -16,3 +16,5 @@
 01.00.10    2017.08.09  Added UserNotes tag. Displays notes to user when creating a new document.
 01.01.00    2017.08.09  Added reading of multiple directories.
                         Added duplicate file detection.
+01.01.01    2017.08.14  Added CopyOnly feature.
+                        Fixed Select Nearest Match bug.
