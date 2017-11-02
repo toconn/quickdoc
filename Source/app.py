@@ -1,14 +1,17 @@
-from ua.core.errors.errors import ItemAlreadyExists
+from ua.core.errors.errors import ItemAlreadyExists, ItemNotFound, UserRequestExit
 from ua.core.utils import fileutils
 
 class App:
     
-    def __init__(self, qdocs, ua_os):
+    def __init__(self, qdocs, ua_os, list_picker):
         
         self._qdocs = qdocs
         self._ua_os = ua_os
+        self._list_picker = list_picker
 
     def main (self, parsed_params):
+        
+        qdoc = None
         
         if self._qdocs.has_duplicates():
             
@@ -19,7 +22,7 @@ class App:
                 for qdoc_file in self._qdocs.duplicates_dict()[name]:
                     print ("        " + qdoc_file.path)
         
-            print ("")
+            print ()
         
         if parsed_params.list_docs_flag:
             
@@ -31,9 +34,44 @@ class App:
             print()
         
         if parsed_params.qdoc_name:
-        
-            qdoc = self._qdocs.retrieve_qdoc (parsed_params.qdoc_name)
             
+            # Retrieve qdoc:
+        
+            try:
+                
+                qdoc = self._qdocs.retrieve_qdoc (parsed_params.qdoc_name)
+                
+            except ItemNotFound:
+                
+                matching_qdoc_names = self._qdocs.retrieve_matching_qdoc_names (parsed_params.qdoc_name)
+                
+                if len (matching_qdoc_names) > 0:
+                    
+                    try:
+
+                        print ("Select one of these:")
+                        print ()
+                        
+                        index = self._list_picker.pick_item (matching_qdoc_names)
+                        
+                        print ()
+                        
+                        qdoc_name = matching_qdoc_names[index]
+                        qdoc = self._qdocs.retrieve_qdoc (qdoc_name)
+                        
+                        print ("Running '" + qdoc_name + "'...")
+                        print()
+
+                    except UserRequestExit:
+                        
+                        pass    # Handled by qdoc = None
+                    
+                else:
+                    
+                    print ("'" + parsed_params.qdoc_name + "' does not exist.")
+        
+        if qdoc:
+               
             # Show User Notes:
 
             if parsed_params.new_doc_flag:
@@ -42,7 +80,7 @@ class App:
             
                 if user_notes:
                     print (user_notes)
-                    print ("")
+                    print ()
             
             qdoc.set_params (parsed_params.parameters)
             
@@ -52,11 +90,11 @@ class App:
                 tags = [ tag for tag in tag_dict.keys() ]
                 tags.sort()
                 
-                print ('Tags:')
+                print ("Tags:")
                 for tag in tags:
-                    print ('    ' + tag.ljust (20) + ": " + tag_dict[tag])
+                    print ("   " + tag.ljust (20) + ": " + tag_dict[tag])
                 
-                print('')
+                print()
             
             # Create document:
             
@@ -65,8 +103,8 @@ class App:
                 try:
                     
                     if not parsed_params.show_tags_flag:
-                        print ('Dir:  ' + qdoc.target_file_dir())
-                        print ('Name: ' + qdoc.target_file_name())
+                        print ("Dir:  " + qdoc.target_file_dir())
+                        print ("Name: " + qdoc.target_file_name())
                     
                     qdoc.create()
                     print ('Document created: \'' + qdoc.target_file_path() + '\'.')
@@ -105,7 +143,6 @@ class App:
                     print ("Done.")
                             
                 else:
-                    print ('Can not find \'' + target_file_path + '\'')
+                    print ("Can not find '" + target_file_path + "'")
  
-            print ()
-
+        print ()

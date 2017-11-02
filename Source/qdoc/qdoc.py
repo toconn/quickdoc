@@ -7,8 +7,8 @@ from ua.core.comp.duplicates import DuplicateTracker
 from ua.core.comp.findfile import FindFile
 from ua.core.errors.errors import InvalidConfig
 from ua.core.errors.errors import ItemAlreadyExists
+from ua.core.errors.errors import ItemNotFound
 from ua.core.errors.errors import UserRequestExit
-from ua.core.errors.errors import FailedValidations
 
 from ua.core.utils import fileutils
 from ua.core.utils import strutils
@@ -25,6 +25,8 @@ SETTING_FILE_NAME = 'fileName'
 SETTING_FILE_DIR = 'fileDir'
 SETTING_FIRST_DATE = 'firstDate'
 
+TAG_BIWEEK_NUMBER = 'biweekNumber'
+TAG_BIWEEK_NUMBER_PADDED = 'paddedBiweekNumber'
 TAG_COMMAND_COPY_ONLY = "copyOnly"
 TAG_DATE = 'date'
 TAG_FILE_NAME = SETTING_FILE_NAME
@@ -141,7 +143,7 @@ class QDoc:
             self._target_file_path = None
             self._def_tag_dict_actual = None
 
-            raise FailedValidations('File path couldn\'t be generated: \'' + self._file_path + '\'')
+            raise InvalidConfig ('File path couldn\'t be generated: \'' + self._file_path + '\'')
 
         else:
             
@@ -277,6 +279,10 @@ class QDoc:
             tag_dict[TAG_WEEK_NEXT_START_DATE] = self._to_date_string (week_next_start_date)
             tag_dict[TAG_WEEK_NEXT_END_DATE] = self._to_date_string (week_next_end_date)
             
+        if TAG_WEEK_NEXT_NUMBER in tag_dict:
+            tag_dict[TAG_BIWEEK_NUMBER] = str (int (int (tag_dict[TAG_WEEK_NEXT_NUMBER]) / 2))
+            tag_dict[TAG_BIWEEK_NUMBER_PADDED] = tag_dict[TAG_BIWEEK_NUMBER].rjust (3, '0')
+            
     def _to_date (self, date_string):
         
         date_string = date_string.replace ('/', self._date_separator)
@@ -351,48 +357,29 @@ class QDocs:
          
     def retrieve_qdoc (self, def_name):
         
-        def_file_actual = None
-        
         if def_name in self._def_file_dict:
             
             def_file_actual = self._def_file_dict[def_name]
+            qdoc = QDoc (date_format = self._date_format, date_separator = self._date_separator, def_file = def_file_actual, ua_os = self._ua_os)
         
         else:
             
-            # Try to match subname:
-
-            find_count = 0
-            
-            for def_file_key in self._def_file_dict:
-                
-                def_file = self._def_file_dict[def_file_key]
-                
-                if strutils.startswith_ignore_case(def_file.name, def_name):
-                    def_file_actual = def_file
-                    find_count += 1
-            
-            if find_count > 1:
-                
-                # print matching names:
-                
-                print ("Names (" + str (find_count) + "): ")
-                for def_file_key in self._def_file_dict:
-                
-                    def_file = self._def_file_dict[def_file_key]
-                    
-                    if strutils.startswith_ignore_case(def_file.name, def_name):
-                        print ("   " + def_file.name)
-
-                print()
-                
-                raise FailedValidations('Ambiguous name \'' + def_name + '\'.')
-
-            
-            if find_count < 1:
-
-                raise FailedValidations('Could not find \'' + def_name + '\'.')
+            raise ItemNotFound ("'" + def_name + "' not found.")
         
-        return QDoc(date_format = self._date_format, date_separator = self._date_separator, def_file = def_file_actual, ua_os = self._ua_os)
+        return qdoc
+
+    def retrieve_matching_qdoc_names (self, def_name):
+        
+        qdocs = []
+                
+        for def_file_key in self._def_file_dict:
+        
+            def_file = self._def_file_dict[def_file_key]
+            
+            if strutils.startswith_ignore_case(def_file.name, def_name):
+                qdocs.append (def_file.name)
+                
+        return qdocs
 
     def _find_def_dirs (self, settings_subdir, ua_os):
         '''
@@ -431,5 +418,4 @@ class QDocs:
                 duplicates_tracker.add(def_name, qdoc_def_file)
         
         return def_file_dict, duplicates_tracker.duplicates_dict()
-
 
