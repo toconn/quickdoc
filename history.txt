@@ -19,3 +19,4 @@
 01.01.01    2017.08.14  Added CopyOnly feature.
                         Fixed Select Nearest Match bug.
 01.02.00    2017.11.02  Show select list for more than one match.
+01.02.01    2017.11.13  If partial match returns one record, select it.

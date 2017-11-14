@@ -45,7 +45,12 @@ class App:
                 
                 matching_qdoc_names = self._qdocs.retrieve_matching_qdoc_names (parsed_params.qdoc_name)
                 
-                if len (matching_qdoc_names) > 0:
+                if len (matching_qdoc_names) == 1:
+                    
+                    qdoc_name = matching_qdoc_names[0]
+                    qdoc = self._qdocs.retrieve_qdoc (qdoc_name)
+                    
+                elif len (matching_qdoc_names) > 0:
                     
                     try:
 
