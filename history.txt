@@ -20,3 +20,4 @@
                         Fixed Select Nearest Match bug.
 01.02.00    2017.11.02  Show select list for more than one match.
 01.02.01    2017.11.13  If partial match returns one record, select it.
+01.02.03    2017.12.14  Added name tag with no spaces, upper and lower cases.

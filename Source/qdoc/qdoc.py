@@ -25,6 +25,8 @@ SETTING_FILE_NAME = 'fileName'
 SETTING_FILE_DIR = 'fileDir'
 SETTING_FIRST_DATE = 'firstDate'
 
+TAG_NAME = 'name'
+
 TAG_BIWEEK_NUMBER = 'biweekNumber'
 TAG_BIWEEK_NUMBER_PADDED = 'paddedBiweekNumber'
 TAG_COMMAND_COPY_ONLY = "copyOnly"
@@ -43,9 +45,14 @@ TAG_WEEK_NEXT_END_DATE = 'weekNextEndDate'
 
 TAG_USER_NOTES = "userNotes"
 
+TAG_PART_LOWER_CASE = 'LowerCase'
+TAG_PART_UPPER_CASE = 'UpperCase'
+TAG_PART_NO_SPACES = 'NoSpaces'
+
 
 class QDoc:
-    ''' Responsible for reading the definition, locating and creating the target file.
+    '''
+         Responsible for reading the definition, locating and creating the target file.
     '''
 
     def __init__(self, date_format, date_separator, def_file, ua_os, load_data = True):
@@ -118,6 +125,12 @@ class QDoc:
         
         # request missing data:
         
+        ####
+        #### TODO: Move This Out of the Class:
+        ####
+        #### Inputs should be handled externally.
+        #### 
+        
         if len (param_tags) > len (params):
             for tag in param_tags[len(params):]:
                 if tag not in def_tag_dict_actual:
@@ -133,6 +146,7 @@ class QDoc:
         # Update variables:
         
         def_tag_dict_actual = text_parser_perc.update_variable_values (def_tag_dict_actual)
+        def_tag_dict_actual = self._set_tag_defaults(def_tag_dict_actual)
         
         # check for file name:
         
@@ -159,6 +173,17 @@ class QDoc:
             return self._def_tag_dict[TAG_USER_NOTES]
         else:
             return None
+
+    def _add_text_forms (self, tag_name, tag_value, tag_dict):
+        
+        tag_value_no_spaces = tag_value.replace(' ', '')
+        
+        tag_dict[tag_name + TAG_PART_LOWER_CASE] = tag_value.lower()
+        tag_dict[tag_name + TAG_PART_UPPER_CASE] = tag_value.upper()
+        
+        tag_dict[tag_name + TAG_PART_NO_SPACES] = tag_value_no_spaces
+        tag_dict[tag_name + TAG_PART_NO_SPACES + TAG_PART_LOWER_CASE] = tag_value_no_spaces.lower()
+        tag_dict[tag_name + TAG_PART_NO_SPACES + TAG_PART_UPPER_CASE] = tag_value_no_spaces.upper()
 
     def _calc_week_end_date (self, week_start_date):
 
@@ -255,6 +280,10 @@ class QDoc:
         
         if not TAG_DATE in tag_dict:
             tag_dict[TAG_DATE] = self._to_date_string (date.today())
+            
+        
+        if TAG_NAME in tag_dict:
+            self._add_text_forms (TAG_NAME, tag_dict[TAG_NAME], tag_dict)
         
         if SETTING_FIRST_DATE in tag_dict and not TAG_WEEK_NUMBER in tag_dict:
             week_number = self._calc_week_number (tag_dict[SETTING_FIRST_DATE], tag_dict[TAG_DATE])
@@ -283,6 +312,8 @@ class QDoc:
             tag_dict[TAG_BIWEEK_NUMBER] = str (int (int (tag_dict[TAG_WEEK_NEXT_NUMBER]) / 2))
             tag_dict[TAG_BIWEEK_NUMBER_PADDED] = tag_dict[TAG_BIWEEK_NUMBER].rjust (3, '0')
             
+        return tag_dict
+            
     def _to_date (self, date_string):
         
         date_string = date_string.replace ('/', self._date_separator)
@@ -296,7 +327,7 @@ class QDoc:
     def _to_date_string (self, date):
         
         return date.strftime (self._date_format)
-
+    
     def _validate_def (self, tag_dict):
 
         errors = []
