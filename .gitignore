@@ -3,12 +3,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
+.project
+.pydevproject
+
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
 env/
+bin/
+bin_ua/
 build/
 develop-eggs/
 dist/
@@ -25,6 +31,13 @@ wheels/
 .installed.cfg
 *.egg
 
+#IDEs
+.idea/
+.classpath
+.project
+.pydevproject
+.settings/
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -34,6 +47,7 @@ wheels/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+pip-selfcheck.json
 
 # Unit test / coverage reports
 htmlcov/
@@ -83,9 +97,10 @@ celerybeat-schedule
 .env
 
 # virtualenv
-.venv
 venv/
 ENV/
+.venv
+pyvenv.cfg
 
 # Spyder project settings
 .spyderproject
