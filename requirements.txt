@@ -1,2 +1,3 @@
-# Required Libraries
-toml
+ua_core==2.0.0
+ua_app==2.0.0
+ua_console==2.0.0

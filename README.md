@@ -1,10 +1,18 @@
-# qdoc
-A command line tool for quickly creating documents from templates.
+# qDoc
+A command line tool for quickly creating documents from customizable templates and placing them in the folders they need to be.
 
-## Uses
+## Purpose
 Use it for quickly creating meeting notes, a journal or any type of file.
 
+## Usage
+
 ## Requires
-It requires my Python3-Core project:
-https://github.com/toconn/Python3-Core.git
+Required packages:
+
++ ua_core
++ ua_console
+
+# History
+
+# Philosophy
 
