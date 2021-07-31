@@ -14,8 +14,8 @@ from ua_core.utils import fileutils
 from ua_core.utils import strlistutils
 from ua_core.utils import strutils
 
-from parser import text_parser_perc
-from parser.text_parser_perc import has_var
+from parsers import text_parser_perc
+from parsers.text_parser_perc import has_var
 
 from qdoc.qdoc_helpers import *
 
@@ -127,7 +127,12 @@ class QDoc:
     def target_file_path(self):
         return self._target_file_path
     
-    def set_params (self, params):
+    def set_params (self, param_values):
+        ''' Matches the passed in param values
+            to the list of settable parameters 
+            in the order the parameters are listed
+            in the qdef file.
+        '''
         
         def_tag_dict_actual = self._def_tag_dict.copy()
         
@@ -135,7 +140,7 @@ class QDoc:
 
         param_tags = self._param_tags
         
-        for tag, value in zip (param_tags, params):
+        for tag, value in zip (param_tags, param_values):
             def_tag_dict_actual[tag] = value
         
         # request missing data:
@@ -146,8 +151,8 @@ class QDoc:
         #### Inputs should be handled externally.
         #### 
         
-        if len (param_tags) > len (params):
-            for tag in param_tags[len(params):]:
+        if len (param_tags) > len (param_values):
+            for tag in param_tags[len(param_values):]:
                 if tag not in def_tag_dict_actual:
                     
                     print (tag + ": ", end='')
@@ -167,12 +172,12 @@ class QDoc:
         
         target_file_path = self._get_target_file_path (def_tag_dict_actual)
         
-        if has_var (target_file_path):
+        if has_var(target_file_path):
 
             self._target_file_path = None
             self._def_tag_dict_actual = None
 
-            raise InvalidConfig ('File path couldn\'t be generated: \'' + self._file_path + '\'')
+            raise InvalidConfig ('File path couldn\'t be generated: \'' + target_file_path + '\'')
 
         else:
             

@@ -9,27 +9,27 @@ class App:
         self._ua_os = ua_os
         self._list_picker = list_picker
 
-    def main (self, parsed_params):
+    def main(self, parsed_params):
         
         qdoc = None
         
         if self._qdocs.has_duplicates():
             
-            print ("Duplicates definitions found:")
+            print("Duplicates definitions found:")
             
             for name in self._qdocs.duplicates_dict():
-                print ("    " + name + ":")
+                print("    " + name + ":")
                 for qdoc_file in self._qdocs.duplicates_dict()[name]:
-                    print ("        " + qdoc_file.path)
+                    print("        " + qdoc_file.path)
         
-            print ()
+            print()
         
         if parsed_params.list_docs_flag:
             
-            print ('Available QDocs:')
+            print('Available QDocs:')
             
             for def_name in self._qdocs.def_names() :
-                print ('    ' + def_name)
+                print('    ' + def_name)
                 
             print()
         
@@ -54,17 +54,17 @@ class App:
                     
                     try:
 
-                        print ("Select one of these:")
-                        print ()
+                        print("Select one of these:")
+                        print()
                         
                         index = self._list_picker.pick_item (matching_qdoc_names)
                         
-                        print ()
+                        print()
                         
                         qdoc_name = matching_qdoc_names[index]
                         qdoc = self._qdocs.retrieve_qdoc (qdoc_name)
                         
-                        print ("Running '" + qdoc_name + "'...")
+                        print("Running '" + qdoc_name + "'...")
                         print()
 
                     except UserRequestExit:
@@ -73,7 +73,7 @@ class App:
                     
                 else:
                     
-                    print ("'" + parsed_params.qdoc_name + "' does not exist.")
+                    print("'" + parsed_params.qdoc_name + "' does not exist.")
         
         if qdoc:
                
@@ -84,8 +84,8 @@ class App:
                 user_notes = qdoc.user_notes()
             
                 if user_notes:
-                    print (user_notes)
-                    print ()
+                    print(user_notes)
+                    print()
             
             qdoc.set_params (parsed_params.parameters)
             
@@ -95,9 +95,9 @@ class App:
                 tags = [ tag for tag in tag_dict.keys() ]
                 tags.sort()
                 
-                print ("Tags:")
+                print("Tags:")
                 for tag in tags:
-                    print ("   " + tag.ljust (20) + ": " + tag_dict[tag])
+                    print("   " + tag.ljust (20) + ": " + tag_dict[tag])
                 
                 print()
             
@@ -108,16 +108,16 @@ class App:
                 try:
                     
                     if not parsed_params.show_tags_flag:
-                        print ("Dir:  " + qdoc.target_file_dir())
-                        print ("Name: " + qdoc.target_file_name())
+                        print("Dir:  " + qdoc.target_file_dir())
+                        print("Name: " + qdoc.target_file_name())
                     
                     qdoc.create()
-                    print ('Document created: \'' + qdoc.target_file_path() + '\'.')
+                    print('Document created: \'' + qdoc.target_file_path() + '\'.')
                     
                 except ItemAlreadyExists as e:
     
-                    print ('File already exists: \'' + e.messages_as_string() + '\'.')
-                    print ()
+                    print('File already exists: \'' + e.messages_as_string() + '\'.')
+                    print()
             
             # Open document if exists:
             
@@ -145,9 +145,9 @@ class App:
                     
                     self._ua_os.open_document(target_file_path)
                     
-                    print ("Done.")
+                    print("Done.")
                             
                 else:
-                    print ("Can not find '" + target_file_path + "'")
+                    print("Can not find '" + target_file_path + "'")
  
-        print ()
+        print()

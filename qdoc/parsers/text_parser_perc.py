@@ -2,9 +2,9 @@ import os
 
 from ua_core.utils import strutils
 
-from parser.parser_const import TYPE_TEXT
-from parser.parser_const import TYPE_VAR
-from parser.parser_const import VAR_TAG_PERCENT
+from parsers.parser_const import TYPE_TEXT
+from parsers.parser_const import TYPE_VAR
+from parsers.parser_const import VAR_TAG_PERCENT
 
 class ParseItem:
     """ 

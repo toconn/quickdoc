@@ -21,9 +21,9 @@ def create_argument_parser():
     )
            
     parser.add_argument('qdoc_name', nargs='?', help='The qdoc to create') # 1st standard argument. Not optional.
-    parser.add_argument('parameters', nargs='*', help='qdoc parameters (if any)')
+    parser.add_argument('parameters', nargs='*', help='qdoc parameter values (if any)')
 
-    # parser.add_argument('\.', help='save in current directory', action='store_true', dest='to_current_dir')
+    # parsers.add_argument('\.', help='save in current directory', action='store_true', dest='to_current_dir')
     parser.add_argument('-l', '--list', help='list available qdocs', action='store_true', dest='list_docs_flag')        
     parser.add_argument('-n', '--new', help='create a new qdoc (will open latest if missing)', action='store_true', dest='new_doc_flag')        
     parser.add_argument('-h', '--help', help='show this help message', action='store_true', dest='show_help_flag')        

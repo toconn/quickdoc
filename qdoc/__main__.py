@@ -22,6 +22,7 @@ try:
 except UaException as e:
     
     print ('\n'.join(e.messages))
+    print ('')
 
 except Exception as e:
     
