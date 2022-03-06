@@ -1,0 +1,12 @@
+# Python App
+
+notice				"Creates a ready to run python app."
+
+target  			"{{name}}"
+gen  				app.py {{name}}.py
+copy				requirements.txt
+copy				shared.py
+
+shell				chmod +x {{name}}.py
+
+parameters			name

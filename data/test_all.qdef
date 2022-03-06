@@ -1,0 +1,25 @@
+
+notice				Notice Text...
+notice				""
+print				Print Text...
+print				""
+
+parameters			name, description
+
+source           	test_all
+target          	"{{HOME}}/Downloads/wip/quickdoc/{{name}}"
+
+value               doh
+
+dir					new_dir_o/new_dir_i
+file				new_file.txt
+
+copy				copy_1
+copy				copy_1.txt
+gen					gen_1
+gen					gen_1.txt
+
+# run				
+shell				"echo 'test content {{name}}' > new_bash_file.txt"
+
+# open gen_1.txt

@@ -1,4 +1,0 @@
-TYPE_TEXT = "t"
-TYPE_VAR = "v"
-
-VAR_TAG_PERCENT = "%"

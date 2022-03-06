@@ -1,0 +1,5 @@
+target_directory	"{{HOME}}/Downloads"
+target_name			"{{date}} - {{name}}.rtf"
+params				name
+notice				This is a notice.
+print				This is a print.

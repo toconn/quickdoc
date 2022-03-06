@@ -1,0 +1,8 @@
+# Python File
+
+notice				"Creates .py"
+
+target  			"{{name}}.py"
+shell				chmod +x {{target}}
+
+parameters			name

@@ -1,0 +1,4 @@
+fileDir		%HOME%/Downloads
+fileName	%date% - %name%.rtf
+firstDate	2017.01.29
+params		name

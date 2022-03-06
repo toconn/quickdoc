@@ -1,0 +1,11 @@
+# Hello world example.
+
+notice				Running hello world example.
+
+parameters			name
+
+source_name			"hello_world.text"
+target_directory	"."
+target_name			"Hello-{{ name }}.text"
+
+print				Completed Hello {{ name }}.
